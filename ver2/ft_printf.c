@@ -214,11 +214,23 @@ void init (t_list *info)
     info->asterisk = 0;
 }
 
-int parce_flag(va_list arg, char *str, t_list *info)
+int type_parce(va_list arg, char *str, t_list *info)
 {
     int counter;
+    int i;
+    int start;
 
     counter = 0;
+    i = 0;
+    start = i;
+    while (str[i] != 'c' || str[i] != 's' || str[i] != 'd' || str[i] != 'i' || \
+        str[i] != 'u' || str[i] != 'x' || str[i] != 'X')
+                i++;
+    info->type = str[i]; // написать про -1 при непопадании
+    if (start != i)
+        counter = flag_parce(arg, info, arg);
+
+    }
 
 
     return (counter);
@@ -234,26 +246,24 @@ int ft_printf(const char *format, ...)
 
     i = 0;
     counter = 0;
-    str = ft_strdup(format);
-    while (str[i + 1] != '\0')
-    {
-        if (str[i] == '%')
-        {
-            str[i] = '\0';
-            counter = ft_putstr_fd(str, 1);
-                                        //printf("str_ptr: %p\n", str); //FIXME!
-            i++;
-                                        break ;
-        }
-        i++;
-    }
-    init(&info);
-    //str = ft_strdup(format + i);
-                                        //printf("str: %s\n", str); //FIXME!
     va_start(arg, format);
-    counter += parce_flag(arg, str + i, &info);
-                                        //printf("counter: %d\n", counter); //FIXME!
-                                        //printf("str + i: %s\n", str + i); //FIXME!
+    str = ft_strdup(format);
+     while (str[i] != '\0')
+     {
+         if (str[i] != '%')
+         {
+             while (str[i] != '%' && str[i + 1] != '\0')
+             i++;
+        str[i] = '\0';
+        printf(">>>>str = %s\n", str); // FIXME!
+        counter += ft_putstr_fd(str, 1);
+        i++;
+        printf(">>>>str[i] = %c\n", str[i]); // FIXME!
+         }
+    init(&info);
+    counter += type_parce(arg, str + i, &info);
+    i++;
+    }
     va_end(arg);
     free(str);
     return (counter);
