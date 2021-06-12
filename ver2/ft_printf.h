@@ -13,6 +13,7 @@ typedef struct s_list
     int	asterisk;
     int width;
     char type;
+    int len; // index, where is %
 }           t_list;
 
 int ft_printf(const char *, ...);
