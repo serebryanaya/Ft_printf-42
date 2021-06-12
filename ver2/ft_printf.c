@@ -222,14 +222,13 @@ void init (t_list *info)
     return (-1);
 }*/
 
-void flag_parce(va_list arg, char *str, int i, t_list *info)
+void flag_parce(va_list arg, char *str, int start, t_list *info)
 {
-    int start;
 
-    start = info->len;
-    printf(">>247>>i = %d\n", i); // FIXME!
+    printf(">>247>>info->len = %d\n", info->len); // FIXME!
     printf(">>247>>start = %d\n", start); // FIXME!
-    while (i > start)
+    printf(">>247>>str[start] = %c\n", str[start]); // FIXME!
+    while (info->len > start)
     {
         if (str[start] == '-')
         {
@@ -243,31 +242,29 @@ void flag_parce(va_list arg, char *str, int i, t_list *info)
         }
         if (str[start] > '0' && str[start] <= '9') // find width
         {
-            while (str[start] >= '0' && str[start] <= '9')
-            {
+            while (str[start] >= '0' && str[start] <= '9') {
                 info->width = 10 * info->width + (str[start] - '0');
                 printf(">>247>>info->width = %d\n", info->width); // FIXME!
                 start++;
             }
             if (str[start] != '.') // find precision
-        {
-            start++;
-            while (str[start] >= '0' && str[start] <= '9')
             {
-                info->precision = 10 * info->precision + (str[start] - '0');
                 start++;
+                while (str[start] >= '0' && str[start] <= '9') {
+                    info->precision = 10 * info->precision + (str[start] - '0');
+                    start++;
+                }
             }
-        }
-            if (str[start] == '*')
-            {
+            if (str[start] == '*') {
                 if (str[start - 1] == '-')
-                    info->precision = arg;
+                    info->precision = va_arg(str,
+                int);
                 else
-                    info->width = arg;
+                info->width = va_arg(str,
+                int);
             }
-        else
-            start++;
         }
+            start++;
     }
 }
 
@@ -281,25 +278,29 @@ int distrib_out(va_list arg, t_list *info)
 int type_parce(va_list arg, char *str, t_list *info)
 {
     int counter;
-    int i;
+
     int start;
 
     counter = 0;
-    i = 0;
-    start = i;
-    //printf(">>228>>str[i] = %c\n", str[i]); // FIXME!
-    while (str[i] != 'c' && str[i] != 's' && str[i] != 'd' && str[i] != 'i' && \
-        str[i] != 'u' && str[i] != 'x' && str[i] != 'X')
+
+    start = ++info->len;
+    //printf(">>228>>str = %s\n", str); // FIXME!
+    while (str[info->len] != 'c' && str[info->len] != 's' && str[info->len] != 'd' && \
+    str[info->len] != 'i' && str[info->len] != 'u' && str[info->len] != 'x' && \
+    str[info->len] != 'X')
     {
-        if (str[i] == '\0')
+        info->len++;
+        if (str[info->len] == '\0')
             return (-1);
-        i++;
     }
-    info->type = str[i]; // написать про -1 при непопадании
-    printf(">>237>>info->type = %c\n", info->type); // FIXME!
-    printf(">>237>>i = %d\n", i); // FIXME!
-    if (info->len != (i - 1))
-        flag_parce(arg, str, i, info);
+    info->type = str[info->len]; // написать про -1 при непопадании
+    //printf(">>237>>info->type = %c\n", info->type); // FIXME!
+    //printf(">>237>>info->len = %d\n", info->len); // FIXME!
+    //printf(">>298>>str = %s\n", str); // FIXME!
+    //printf(">>237>>start = %d\n", start); // FIXME!
+    //printf(">>237>>info->len = %d\n", info->len); // FIXME!
+    if (++info->len != start)
+        flag_parce(arg, str, start, info);
     counter += distrib_out(arg, info);
     //printf(">>241>>counter = %d\n", counter); // FIXME!
     return (counter);
@@ -320,39 +321,38 @@ int ft_printf(const char *format, ...)
     va_start(arg, format);
     str = ft_strdup(format);
     init(&info);
-     while (str[i] != '\0')
+     while (str[info.len] != '\0')
      {
          //printf(">>279>>str[i], i = %c [%d]\n", str[i], i); // FIXME!
-         if (str[i] != '%')
+         if (str[info.len] == '%' && str[info.len + 1] == '\0')
+             return(-1);
+         if (str[info.len] != '%')
          {
-             while (str[i] != '%' && str[i + 1] != '\0')
-             i++;
-             while (info.len < i)
-        {
-            //printf(" >>>putchar start"); //FIXME!
-            counter1 += ft_putchar_fd(str[info.len], 1);
-            info.len++;
-        }
+             while (str[info.len] != '%' && str[info.len + 1] != '\0')
+             {
+                 counter1 += ft_putchar_fd(str[info.len], 1);
+                 info.len++;
+             }
+         }
         //printf(">>289>>i = %d\n", i); // FIXME!
         //printf(">>289>>info.len = %d\n", info.len); // FIXME!
         //i++;
-        //printf(">>286>>str[i] = %c\n", str[i]); // FIXME!
-         }
-    counter2 += type_parce(arg, str + info.len, &info);
+        //printf(">>286>>str + info.len = %s\n", str + info.len); // FIXME!
+    counter2 += type_parce(arg, str, &info);
     //printf(">>290>>counter2 = %d\n", counter2); // FIXME!
     //printf(">>291>>str + i = %s\n", str + i); // FIXME!
     if (counter2 < 0)
         return (-1);
     counter1 += counter2;
     //i += 2;
-    info.len += 2;
-    printf(">>301>>zero = %d\n", info.zero); // FIXME!
+    //info.len += 2;
+   /* printf(">>301>>zero = %d\n", info.zero); // FIXME!
          printf(">>301>>minus = %d\n", info.minus); // FIXME!
          printf(">>301>>precision = %d\n", info.precision); // FIXME!
          printf(">>301>>asterisk = %d\n", info.asterisk); // FIXME!
          printf(">>301>>width = %d\n", info.width); // FIXME!
          printf(">>301>>type = %c\n", info.type); // FIXME!
-         printf(">>301>>len = %d\n", info.len); // FIXME!
+         printf(">>301>>len = %d\n", info.len); // FIXME!*/
     }
     va_end(arg);
     printf("\n>>301>>len end = %d\n", info.len); // FIXME!
