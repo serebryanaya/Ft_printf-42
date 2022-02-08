@@ -15,6 +15,17 @@ You will mainly learn about using a variable number of arguments.
   + `make re`
 
 Compile your own `main.c` with this library `libftprintf.a` to use function.
+```c
+void main(void)
+{
+  int i;
+
+  i = 42;
+  ft_printf("value: %d\n", i);
+
+  // value: 42
+}
+```
 
 ## Mandatory part
 You have to recode the `printf()` function from libc.
