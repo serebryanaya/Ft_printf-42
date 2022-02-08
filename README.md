@@ -4,6 +4,18 @@ The goal of this project is pretty straightforward. You will recode `printf()`.
 You will mainly learn about using a variable number of arguments.
 > Because ft_putnbr() and ft_putstr() aren’t enough
 
+## How to use
++ To compile library:
+  + `make` or `make bonus`
++ To remove objects:
+  + `make clean`
++ To remove objects and binary file (program):
+  + `make fclean`
++ To re-compile:
+  + `make re`
+
+Compile your own `main.c` with this library `libftprintf.a` to use function.
+
 ## Mandatory part
 You have to recode the `printf()` function from libc.
 
